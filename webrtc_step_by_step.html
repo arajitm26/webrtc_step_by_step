@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+
+<script type="text/javascript">
+  
+  const peer = new RTCPeerConnection();
+  
+  peer.onicecandidate = e => { 
+        console.log('onicecandidate');
+        // send "e.candidate" this to another user and another user will set peer.addIceCandidate(icecandidate);
+        if(peer.iceGatheringState == "complete")
+        {
+          //after onicecandidate completed another user will call start() method
+          console.log('onicecandidate completed');
+        } 
+      };
+
+  async function start() {
+      try
+      {
+        const stream = await navigator.mediaDevices.getUserMedia({video: true,audio:true});
+    
+        stream.getTracks().forEach(t => {peer.addTrack(t, stream); console.log('addTrack')});
+        
+        console.log('before setLocalDescription')
+        peer.setLocalDescription();
+        // send "peer.localDescription" this to another user and another user will set peer.setRemoteDescription(description);
+        console.log('after setLocalDescription')
+      }
+      catch(e)
+      {
+        start()
+      }
+     
+    }
+
+  start();
+
+
+  // after onicecandidate completed another user will send you peer data//
+  // when you get icecandidate from another user you should set "peer.addIceCandidate(icecandidate)"
+  // when you get description from another user you should set "peer.setRemoteDescription(description)"
+
+  // whenever the remote video is available 
+  peer.ontrack = e => {
+    const track = e.track;
+    const stream = e.streams[0];
+    // remoteVideo.srcObject = stream;
+    console.log("remoteVideo")
+  }
+</script>
+</body>
+</html>
